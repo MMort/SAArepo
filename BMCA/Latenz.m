@@ -1,4 +1,4 @@
-function[] = Latenz(event, channel)
+function[latenz] = Latenz(event, channel)
 % Zeitraum vom Beginn des Messbereiches bis zum Beginn der Muskelaktivität im
 % Kanal x ODER y ODER z ODER ...
 x = find(event>0);
