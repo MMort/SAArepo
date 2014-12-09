@@ -1,14 +1,36 @@
-function[latenz] = Latenz(event, channel)
+function[latenz1, latenz2, entspannungslatenz] = Latenz(channel1, Messbeginn, Messende)
 % Zeitraum vom Beginn des Messbereiches bis zum Beginn der Muskelaktivität im
 % Kanal x ODER y ODER z ODER ...
-x = find(event>0);
-starttrigger = min(x);
-%channel=channel(50:end)
-x = find((channel>20)|(channel<-20))
-startactivity = min(x);
-%startactivity = startactivity +100;
 
-latenz = startactivity - starttrigger;
+% load phoenix.mat
+% channel1=phoenix.data(8,:);
+% [Messbeginn Messende] = Messzeiten (phoenix.data(1,:));
+% plot(channel1);
+
+
+mean_Beginn = mean(channel1(250:Messbeginn));
+std_Beginn = std(channel1(250:Messbeginn));
+std_alles = std(channel1(250:end));
+
+%kein signal (nur rauschen)
+if(std_alles<1)
+    latenz1 = NaN;
+    latenz2=NaN;
+    entspannungslatenz=NaN;
+    return;
+end
+
+threashold_pos_Begin = mean_Beginn + 6 * std_Beginn;
+threashold_min_Begin = mean_Beginn - 6*std_Beginn;
+x = find((channel1(250:end)>threashold_pos_Begin)|(channel1(250:end)<threashold_min_Begin));
+if(isempty(x))
+    latenz1 = NaN;
+else
+    y=(min(x)+250);
+    latenz1 = y/1024;
+end
+
+
 
 % Zeitraum von einem zuvor berechneten Zeitpunkt bis zum nächsten Beginn der
 % Muskelaktivität im Kanal x ODER y ODER z ODER ...
@@ -16,6 +38,13 @@ latenz = startactivity - starttrigger;
 % x = Latenz von Beginn des Messbereiches bis Beginn der Muskelaktivität im
 % Kanal 10 oder 11
 % Latenz von x bis Beginn der Muskelaktivität im Kanal 12
+x = find((channel1(Messbeginn:Messende)>threashold_pos_Begin)|(channel1(Messbeginn:Messende)<threashold_min_Begin));
+if(isempty(x))
+    latenz2 = NaN;
+else
+    y=(min(x));
+    latenz2 = y/1024;
+end
 
 % Tabelle der Entspannungslatenz ab einem definierbaren Zeitpunkt (entweder
 % Beginn der Aufnahme oder variabler Zeitpunkt x wie oben)
@@ -29,7 +58,15 @@ latenz = startactivity - starttrigger;
 % LDELT 0.000 (war immer entspannt)
 % LBIBR n/a (konnte während des Messzeitraumes nicht entspannt werden)
 
-% Entspannungslatenz für einen bestimmten Kanal
+x = find((channel1(250:end)<threashold_pos_Begin)|(channel1(250:end)>threashold_min_Begin));
+if(isnan(latenz1))
+    entspannungslatenz=0;
+elseif (isempty(x))
+    entspannungslatenz=NaN;
+else
+    x = find((channel1(Messende:end)>threashold_pos_Begin)|(channel1(Messende:end)<threashold_min_Begin));
+    y=max(x);
+    entspannungslatenz=y/1024;
+end
 
-% Zeitpunkt der maximalen Amplitude (siehe 3.3.2)
 end

@@ -5,6 +5,8 @@ function Data = mr_gui()
     ss = get(0,'ScreenSize');
     Data.hfm = figure('Position',[1 1 1480 581],'Name','Main Figure'); % ...creating main figure
     p = get(Data.hfm,'Position');
+    Data.ah2 = axes('units', 'normalized', 'position', [0.1 0.41 0.693 0.216])
+Data.ah3 = axes('units', 'normalized', 'position', [0.1 0.09 0.693 0.216])
     Data.hpp2 = uicontrol('Style','pushbutton','String','Load-EMG','Position',[15 512 70 30],... %...absolute position to the figures client
          'Callback', {@pp2,Data.hfm}); %...call function pp2 and passing parameter Data.f by pushing this button
 
@@ -18,14 +20,14 @@ function pp1(obj,event,h) % ...called by pushbutton 1
     list = get(obj,'String');
     item_selected = list{index_selected}; 
     [Messbeginn Messende] = Messzeiten( Data.daten.data(1,:));
-    Data.ah2 = axes('units', 'normalized', 'position', [0.1 0.41 0.693 0.216])
+    
     plot(Data.ah2, Data.daten.data(index_selected+1,:) );
-    l = Latenz (Data.daten.data(1,:), Data.daten.data(index_selected+1,:));
+    [latenz1, latenz2, entspannungslatenz] = Latenz (Data.daten.data(index_selected+1,:),Messbeginn, Messende);
     [RMS, peak_row, peak_col, Max_p_y,Max_p_x, Median_p, ben_y]=Amplitude_Frequency_analysis(Data.daten.data(index_selected+1,:), Messbeginn, Messende, Data.input1);
 
     tab1 = uitable('Position', [1202 212 255 145]);
-    complexData1(:,1) = [{'RMS'} {'Max. Amplitude, x [s]'} {'Max. Amplitude, y [µV]'} {'FFT Max Amplitude, y'} {'FFT Max Amplitude, x [Hz]'} {'FFT Median'} {'Amplitude zu best. ZP'}];
-    complexData1(:,2)=  [{RMS} {peak_row/1024} {peak_col} {Max_p_y} {Max_p_x} {Median_p} {ben_y}];
+    complexData1(:,1) = [{'RMS'} {'Max. Amplitude, x [s]'} {'Max. Amplitude, y [µV]'} {'FFT Max Amplitude, y'} {'FFT Max Amplitude, x [Hz]'} {'FFT Median'} {'Amplitude zu best. ZP'} {'Latenz von Start'} {'Latenz von Event'} {'Entspannungslatenz'}];
+    complexData1(:,2)=  [{RMS} {peak_row/1024} {peak_col} {Max_p_y} {Max_p_x} {Median_p} {ben_y} {latenz1} {latenz2} {entspannungslatenz}];
     set(tab1, 'Data', complexData1);
     set(tab1, 'ColumnName', {'Value-Name', 'Value'}); 
     %set(h,'UserData',Data);
@@ -38,15 +40,15 @@ function pp3(obj,event,h) % ...called by pushbutton 1
     list = get(obj,'String');
     item_selected = list{index_selected}; 
     
-    Data.ah3 = axes('units', 'normalized', 'position', [0.1 0.09 0.693 0.216])
+    
     plot(Data.ah3, Data.daten.data(index_selected+1,:));
     [Messbeginn Messende] = Messzeiten( Data.daten.data(1,:));
-    l = Latenz (Data.daten.data(1,:), Data.daten.data(index_selected+1,:));
+    [latenz1, latenz2, entspannungslatenz] = Latenz (Data.daten.data(index_selected+1,:),Messbeginn, Messende);
     [RMS, peak_row, peak_col, Max_p_y,Max_p_x, Median_p, ben_y]=Amplitude_Frequency_analysis(Data.daten.data(index_selected+1,:), Messbeginn, Messende, Data.input2);
 
     tab2 = uitable('Position', [1211 20 255 145]);
-    complexData1(:,1) = [{'RMS'} {'Max. Amplitude, x [s]'} {'Max. Amplitude, y [µV]'} {'FFT Max Amplitude, y'} {'FFT Max Amplitude, x [Hz]'} {'FFT Median'} {'Amplitude zu best. ZP'}];
-    complexData1(:,2)=  [{RMS} {peak_row/1024} {peak_col} {Max_p_y} {Max_p_x} {Median_p} {ben_y}];
+    complexData1(:,1) = [{'RMS'} {'Max. Amplitude, x [s]'} {'Max. Amplitude, y [µV]'} {'FFT Max Amplitude, y'} {'FFT Max Amplitude, x [Hz]'} {'FFT Median'} {'Amplitude zu best. ZP'} {'Latenz von Start'} {'Latenz von Event'} {'Entspannungslatenz'}];
+    complexData1(:,2)=  [{RMS} {peak_row/1024} {peak_col} {Max_p_y} {Max_p_x} {Median_p} {ben_y} {latenz1} {latenz2} {entspannungslatenz}];
     set(tab2, 'Data', complexData1);
     set(tab2, 'ColumnName', {'Value-Name', 'Value'}); 
     h=Data;
